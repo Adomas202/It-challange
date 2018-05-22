@@ -17,7 +17,6 @@ public class Main {
         int i;
         double interestPayment;
         double principalPayment;
-        DecimalFormat format2Places = new DecimalFormat("0.00");
         BigDecimal Big;
 
         LocalDate startDate = LocalDate.of(2016, Month.NOVEMBER, 15);
@@ -29,8 +28,9 @@ public class Main {
         createCSVTemplate(pw, sb);
 
         annuity = (interest /(1-(Math.pow((1+interest),-(amountOfPayments)))))*loanSize;
-        annuity = Math.round(annuity * 100.0) / 100.0;
-        annuity = 415.63;
+        BigDecimal annuityTemp = new BigDecimal(annuity);
+        annuityTemp = annuityTemp.setScale(2, BigDecimal.ROUND_DOWN);
+        annuity = annuityTemp.doubleValue();
         for (i = 1; i <= amountOfPayments; i++) {
             interestPayment = Math.round(loanSize * 100.0) / 100.0 * interest;
             interestPayment = Math.round(interestPayment * 100.0) / 100.0;
@@ -39,8 +39,6 @@ public class Main {
             if (i == amountOfPayments) {
                 annuity = loanSize + interestPayment;
             }
-//            BigDecimal principalPayment =  new BigDecimal(annuity - interestPayment);
-//            principalPayment = principalPayment.setScale(2, BigDecimal.ROUND_UP);
             sb.append(i);
             sb.append(',');
             sb.append(startDate.format(formatter));
