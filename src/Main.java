@@ -2,58 +2,70 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.math.BigDecimal;
-import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.format.DateTimeFormatter;
+import java.util.Scanner;
 
 public class Main {
 
     public static void main(String[] args) throws FileNotFoundException {
-        double loanSize = 10000;
-        double amountOfPayments = 26;
-        double interestRate = 7;
-        double interest = interestRate * 0.01 / 12;
+
+        double loanSize = 5000;
+        double amountOfPayments = 24;
+        double interestRate = 12;
         int i;
         double interestPayment;
         double principalPayment;
-        DecimalFormat format2Places = new DecimalFormat("0.00");
-        BigDecimal Big;
+        LocalDate startDate = LocalDate.of(2017, Month.APRIL, 15);
 
-        LocalDate startDate = LocalDate.of(2016, Month.NOVEMBER, 15);
+        Scanner reader = new Scanner(System.in);
+        System.out.println("Įveskite paskolos dydį: ");
+        loanSize = reader.nextDouble();
+        System.out.println("Įveskite metinių palūkanų dydį: ");
+        interestRate = reader.nextDouble();
+        System.out.println("Įveskite, per kiek mėnesių įmoka turi būti grąžinta: ");
+        amountOfPayments = reader.nextDouble();
+//        System.out.println("Įveskite, nuo kada pradėsite mokėti: ");
+//        startDate = LocalDate.ofEpochDay(reader.nextInt());
+
+
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
         double annuity;
+        double interest = interestRate * 0.01 / 12;
 
         PrintWriter pw = new PrintWriter(new File("graph.csv"));
         StringBuilder sb = new StringBuilder();
         createCSVTemplate(pw, sb);
 
         annuity = (interest /(1-(Math.pow((1+interest),-(amountOfPayments)))))*loanSize;
-        annuity = Math.round(annuity * 100.0) / 100.0;
-        annuity = 415.63;
+        BigDecimal annuityTemp = new BigDecimal(annuity);
+        annuityTemp = annuityTemp.setScale(2, BigDecimal.ROUND_DOWN);
+        annuity = annuityTemp.doubleValue();
         for (i = 1; i <= amountOfPayments; i++) {
             interestPayment = Math.round(loanSize * 100.0) / 100.0 * interest;
             interestPayment = Math.round(interestPayment * 100.0) / 100.0;
-            principalPayment = annuity - interestPayment;
-            principalPayment = Math.round(principalPayment * 100.0) / 100.0;
+
             if (i == amountOfPayments) {
                 annuity = loanSize + interestPayment;
             }
-//            BigDecimal principalPayment =  new BigDecimal(annuity - interestPayment);
-//            principalPayment = principalPayment.setScale(2, BigDecimal.ROUND_UP);
+
+            principalPayment = annuity - interestPayment;
+            principalPayment = Math.round(principalPayment * 100.0) / 100.0;
+
             sb.append(i);
             sb.append(',');
             sb.append(startDate.format(formatter));
             sb.append(',');
-            sb.append(loanSize);
+            sb.append(Math.round(loanSize * 100.0) / 100.0);
             sb.append(',');
-            System.out.println(annuity);
+            sb.append(principalPayment);
             sb.append(',');
             sb.append(Math.round(interestPayment * 100.0) / 100.0);
             sb.append(',');
             sb.append(Math.round(annuity * 100.0) / 100.0);
             sb.append(',');
-            sb.append(interestRate);
+            sb.append((int)interestRate);
             sb.append(',');
             sb.append("\n");
             startDate = startDate.plusMonths(1);
@@ -62,17 +74,6 @@ public class Main {
 
         pw.write(sb.toString());
         pw.close();
-
-    }
-
-    public static int roundDown(double number, double place) {
-        double result = number / place;
-        result = Math.floor(result);
-        result *= place;
-        return (int)result;
-    }
-
-    private static void countAnnuity(int amountOfPayments, PrintWriter pw, StringBuilder sb, LocalDate startDate) {
 
     }
 
