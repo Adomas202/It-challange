@@ -11,43 +11,64 @@ public class Main {
 
     public static void main(String[] args) throws FileNotFoundException {
 
-        double loanSize = 5000;
-        double amountOfPayments = 24;
-        double interestRate = 12;
-        int i;
-        double interestPayment;
-        double principalPayment;
-        LocalDate startDate = LocalDate.of(2017, Month.APRIL, 15);
+        double loanSize;
+        double amountOfPayments;
+        double interestRate;
+        LocalDate startDate;
+        StringBuilder sb = new StringBuilder();
+        PrintWriter pw;
 
         Scanner reader = new Scanner(System.in);
-        System.out.println("Įveskite paskolos dydį: ");
-        loanSize = reader.nextDouble();
-        System.out.println("Įveskite metinių palūkanų dydį: ");
-        interestRate = reader.nextDouble();
-        System.out.println("Įveskite, per kiek mėnesių įmoka turi būti grąžinta: ");
-        amountOfPayments = reader.nextDouble();
+//        System.out.println("Įveskite pradžios datą: ");
+//        loanSize = reader.nextDouble();
+//        System.out.println("Įveskite pradinę sumą: ");
+//        interestRate = reader.nextDouble();
+//        System.out.println("Įveskite palūkanų normą: ");
+//        amountOfPayments = reader.nextDouble();
 //        System.out.println("Įveskite, nuo kada pradėsite mokėti: ");
-//        startDate = LocalDate.ofEpochDay(reader.nextInt());
+//        String date = reader.next();
 
+        startDate = LocalDate.of(2017, Month.APRIL, 15);
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+        pw = new PrintWriter(new File("FirstGraph.csv"));
+        generateGraph(pw, sb, 7, 26, 10000, startDate);
+
+        pw = new PrintWriter(new File("SecondGraph.csv"));
+        generateGraph(pw, sb, 7, 26, 10000, startDate);
+
+    }
+
+    public static void generateGraph(PrintWriter pw, StringBuilder sb, double interestRate, double amountOfPayments,
+                                     double loanSize, LocalDate startDate) throws FileNotFoundException {
         double annuity;
         double interest = interestRate * 0.01 / 12;
+        double interestPayment;
+        double principalPayment;
+        int i;
+        LocalDate midleDate = LocalDate.of(2017, Month.NOVEMBER, 1);
 
-        PrintWriter pw = new PrintWriter(new File("graph.csv"));
-        StringBuilder sb = new StringBuilder();
         createCSVTemplate(pw, sb);
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
 
         annuity = (interest /(1-(Math.pow((1+interest),-(amountOfPayments)))))*loanSize;
         BigDecimal annuityTemp = new BigDecimal(annuity);
         annuityTemp = annuityTemp.setScale(2, BigDecimal.ROUND_DOWN);
         annuity = annuityTemp.doubleValue();
         for (i = 1; i <= amountOfPayments; i++) {
+
+            if (startDate.compareTo(midleDate) > 0) {
+                interestRate = 9;
+                interest = interestRate * 0.01 / 12;
+                annuity = (interest /(1-(Math.pow((1+interest),-(amountOfPayments)))))*loanSize;
+                annuity = annuityTemp.doubleValue();
+            }
+
             interestPayment = Math.round(loanSize * 100.0) / 100.0 * interest;
             interestPayment = Math.round(interestPayment * 100.0) / 100.0;
 
             if (i == amountOfPayments) {
-                annuity = loanSize + interestPayment;
+                annuity = loanSize + interestPayment; // For the last annuity payment because it has different size
             }
 
             principalPayment = annuity - interestPayment;
@@ -57,24 +78,22 @@ public class Main {
             sb.append(',');
             sb.append(startDate.format(formatter));
             sb.append(',');
-            sb.append(Math.round(loanSize * 100.0) / 100.0);
+            sb.append(roundUp(loanSize));
             sb.append(',');
-            sb.append(principalPayment);
+            sb.append(roundUp(principalPayment));
             sb.append(',');
-            sb.append(Math.round(interestPayment * 100.0) / 100.0);
+            sb.append(roundUp(interestPayment));
             sb.append(',');
-            sb.append(Math.round(annuity * 100.0) / 100.0);
+            sb.append(roundUp(annuity));
             sb.append(',');
             sb.append((int)interestRate);
             sb.append(',');
             sb.append("\n");
             startDate = startDate.plusMonths(1);
-            loanSize -= Math.round((annuity - ((Math.round(loanSize * 100.0) / 100.0) * interest)) * 100.0) / 100.0;
+            loanSize -= roundUp(annuity - ((roundUp(loanSize)) * interest));
         }
-
         pw.write(sb.toString());
         pw.close();
-
     }
 
     private static void createCSVTemplate(PrintWriter pw, StringBuilder sb) throws FileNotFoundException {
@@ -93,7 +112,9 @@ public class Main {
         sb.append("interestRate rate");
         sb.append(',');
         sb.append("\n");
+    }
 
-        System.out.println("done!");
+    private static double roundUp(double number) {
+        return Math.round(number * 100.0) / 100.0;
     }
 }
