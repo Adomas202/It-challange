@@ -2,7 +2,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.math.BigDecimal;
-import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.format.DateTimeFormatter;
@@ -15,32 +14,36 @@ public class Main {
         double loanSize;
         double amountOfPayments;
         double interestRate;
+        String answer;
         LocalDate startDate;
         StringBuilder sb = new StringBuilder();
         PrintWriter pw;
         LocalDate interestChangeDate;
 
         Scanner reader = new Scanner(System.in);
-        System.out.println("Įveskite pradžios datą: ");
-        System.out.println("Formatas turi būti MM/dd/yyyy. MM - mėnesis, dd - diena, yyyy - metai");
-        startDate = dateInput(reader.next());
-        System.out.println("Įveskite pradinę sumą: ");
-        loanSize = reader.nextDouble();
-        System.out.println("Įveskite palūkanų normą: ");
-        interestRate = reader.nextDouble();
-        System.out.println("Įveskite įmokų skaičių: ");
-        amountOfPayments = reader.nextDouble();
+        System.out.println("Ar patys norite įvesti parametrus? Jeigu taip, parašykite Y");
+        answer = reader.next();
+//        if (answer.equals("Y")) {
+            System.out.println("Įveskite pradžios datą: ");
+            System.out.println("Formatas turi būti MM/dd/yyyy. MM - mėnesis, dd - diena, yyyy - metai");
+            startDate = dateInput(reader.next());
+            System.out.println("Įveskite pradinę sumą: ");
+            loanSize = reader.nextDouble();
+            System.out.println("Įveskite palūkanų normą: ");
+            interestRate = reader.nextDouble();
+            System.out.println("Įveskite įmokų skaičių: ");
+            amountOfPayments = reader.nextDouble();
 
-        pw = new PrintWriter(new File("FirstGraph.csv")); // Third part
-        generateGraph(pw, sb, interestRate, amountOfPayments, loanSize, startDate, null);
+            pw = new PrintWriter(new File("UserInputGraph.csv")); // Third challenge part
+            generateGraph(pw, sb, interestRate, amountOfPayments, loanSize, startDate, null);
+//        }
+            pw = new PrintWriter(new File("FirstPartGraph.csv")); // First challenge part
+            startDate = LocalDate.of(2017, Month.APRIL, 15);
+            generateGraph(pw, sb, 7, 26, 10000, startDate, null);
 
-        pw = new PrintWriter(new File("FirstGraph.csv")); // First part
-        startDate = LocalDate.of(2017, Month.APRIL, 15);
-        generateGraph(pw, sb, 7, 26, 10000, startDate, null);
-
-        pw = new PrintWriter(new File("SecondGraph.csv"));// Second part
-        interestChangeDate = LocalDate.of(2017, Month.SEPTEMBER, 1);
-        generateGraph(pw, sb, 7, 26, 10000, startDate, interestChangeDate);
+            pw = new PrintWriter(new File("SecondPartGraph.csv")); // Second Challenge part
+            interestChangeDate = LocalDate.of(2017, Month.SEPTEMBER, 1);
+            generateGraph(pw, sb, 7, 26, 10000, startDate, interestChangeDate);
     }
 
     public static void generateGraph(PrintWriter pw, StringBuilder sb, double interestRate, double amountOfPayments,
